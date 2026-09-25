@@ -8,6 +8,7 @@ on:
     paths:
       - "migrations/**"
       - "wrangler.toml"
+      - ".github/workflows/d1-migrations.yml"
 
 permissions:
   contents: read
