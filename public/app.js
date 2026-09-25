@@ -22,6 +22,8 @@ $('#setup').addEventListener('submit',async e=>{
   const m=$('#msg');
   if(p!==c){m.textContent='Passwords do not match.';return}
   if(p.length<14){m.textContent='Use at least 14 characters.';return}
+  if(p.length>256){m.textContent='Use 256 characters or fewer.';return}
+  if(passwordStrength(p)<3){m.textContent='Choose a stronger master password: use a longer passphrase and avoid repeated or predictable patterns.';return}
   const button=e.submitter;
   if(button)button.disabled=true;
   try{
@@ -40,6 +42,22 @@ $('#setup').addEventListener('submit',async e=>{
     m.textContent=e?.message||'Vault creation failed. Please try again.';
   }finally{if(button)button.disabled=false}
 });
+function passwordStrength(p){
+  let score=0;
+  if(p.length>=16)score++;
+  if(p.length>=24)score++;
+  if(/[a-z]/.test(p)&&/[A-Z]/.test(p))score++;
+  if(/\d/.test(p)&&/[^A-Za-z0-9]/.test(p))score++;
+  if(/(.)\1{3,}/.test(p)||/^(?:password|qwerty|123456|letmein|welcome)/i.test(p))score=Math.max(0,score-2);
+  return Math.min(4,score);
+}
+function updateStrength(){
+  const p=$('#password').value,s=$('#strength');
+  if(!p){s.textContent='Use a long passphrase with a mix of characters.';return}
+  const n=passwordStrength(p);
+  s.textContent=n<2?'Weak — add length and unpredictability.':n<3?'Fair — make it longer or less predictable.':n<4?'Strong — good master password.':'Very strong — excellent.';
+}
+$('#password').addEventListener('input',updateStrength);
 async function digestToken(t){
   const bytes=await crypto.subtle.digest('SHA-256',Uint8Array.from(atob(t),c=>c.charCodeAt(0)));
   return b64(new Uint8Array(bytes));
