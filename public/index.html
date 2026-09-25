@@ -1,1 +1,75 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"><title>iKnow Vault</title><link rel="stylesheet" href="/app.css"></head><body><main class="shell"><section class="card"><h1>iKnow Vault</h1><p class="muted">Zero-knowledge password vault</p><section id="firstSetup" hidden><h2>Create your vault</h2><p class="muted">This setup appears only once, while no vault exists.</p><form id="setup"><label>Master password<input id="password" type="password" autocomplete="new-password" minlength="14" maxlength="256" required></label><div id="strength" class="muted" role="status">Use a long passphrase with a mix of characters.</div><label>Confirm password<input id="confirm" type="password" autocomplete="new-password" minlength="14" maxlength="256" required></label><button>Create vault</button></form><p id="msg" class="muted" role="status"></p><p class="warning">Your master password is never sent to the server. If you lose it, encrypted vault data cannot be recovered.</p></section><section id="login" hidden><h2>Sign in</h2><p class="muted">Your vault already exists. Sign in to unlock it.</p><form id="signin"><label>Master password<input id="loginPassword" type="password" autocomplete="current-password" minlength="14" maxlength="256" required></label><button>Sign in</button></form><p id="loginMsg" class="muted" role="status"></p></section><p id="gateMsg" class="muted" role="status"></p></section></main><script src="/app.js" defer></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>iKnow Vault</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<main class="shell">
+<section class="card vault-card">
+<header class="top">
+  <div><h1>iKnow Vault</h1><p id="state" class="muted">Zero-knowledge password vault</p></div>
+  <button id="lock" class="secondary small" type="button" hidden>Lock</button>
+</header>
+
+<section id="gate">
+  <section id="firstSetup" hidden>
+    <h2>Create your vault</h2>
+    <p class="muted">This setup appears only once, while no vault exists.</p>
+    <form id="setup">
+      <label>Master password<input id="password" type="password" autocomplete="new-password" minlength="14" maxlength="256" required></label>
+      <div id="strength" class="muted" role="status">Use a long passphrase with a mix of characters.</div>
+      <label>Confirm password<input id="confirm" type="password" autocomplete="new-password" minlength="14" maxlength="256" required></label>
+      <button>Create vault</button>
+    </form>
+    <p id="msg" class="muted" role="status"></p>
+    <p class="warning">Your master password is never sent to the server. If you lose it, encrypted vault data cannot be recovered.</p>
+  </section>
+
+  <section id="login" hidden>
+    <h2>Sign in</h2>
+    <p class="muted">Your vault already exists. Sign in to unlock it.</p>
+    <form id="signin">
+      <label>Master password<input id="loginPassword" type="password" autocomplete="current-password" minlength="14" maxlength="256" required></label>
+      <button>Sign in</button>
+    </form>
+    <p id="loginMsg" class="muted" role="status"></p>
+  </section>
+  <p id="gateMsg" class="muted" role="status"></p>
+</section>
+
+<section id="vaultApp" hidden>
+  <div id="homeView">
+    <div class="toolbar">
+      <input id="search" placeholder="Search saved credentials…" autocomplete="off">
+      <button id="add" type="button">+ Add New Entry</button>
+    </div>
+    <div id="list" class="list"></div>
+  </div>
+  <div id="detailView" hidden>
+    <button id="back" type="button" class="secondary back">← Back to vault</button>
+    <div id="detailCard" class="detail-card"></div>
+  </div>
+  <p id="saveMsg" class="muted" role="status"></p>
+</section>
+</section>
+</main>
+
+<dialog id="editor">
+<form method="dialog" id="itemForm" class="dialog-card">
+  <h2 id="editorHeading">Add New Entry</h2>
+  <input type="hidden" id="itemId">
+  <label>Title<input id="title" required maxlength="120"></label>
+  <label>Username<input id="username" maxlength="200" autocomplete="off"></label>
+  <label>Password><div class="password-row"><input id="secret" type="password" maxlength="500" autocomplete="new-password"><button type="button" id="gen" class="secondary small">Generate</button></div></label>
+  <label>Website / URL<input id="url" maxlength="500" autocomplete="off"></label>
+  <label>Notes<textarea id="notes" maxlength="3000"></textarea></label>
+  <div class="actions"><button type="button" id="cancel" class="secondary">Cancel</button><button type="submit">Save encrypted entry</button></div>
+</form>
+</dialog>
+<script src="/app.js" defer></script>
+</body>
+</html>
