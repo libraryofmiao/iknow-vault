@@ -10,4 +10,8 @@
 <h1>iKnow Vault</h1><p class="muted">Zero-knowledge password vault</p>
 <form id="setup"><label>Master password<input id="password" type="password" autocomplete="new-password" minlength="14" maxlength="256" required aria-describedby="strength"></label><div id="strength" class="muted" role="status">Use a long passphrase with a mix of characters.</div><label>Confirm password<input id="confirm" type="password" autocomplete="new-password" minlength="14" maxlength="256" required></label><button>Open vault</button></form>
 <p id="msg" class="muted"></p><p class="warning">Your master password is never sent to the server. If you lose it, encrypted vault data cannot be recovered.</p>
+<hr>
+<h2>Open existing vault</h2>
+<form id="existing"><label>Vault ID<input id="vaultId" inputmode="text" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" required></label><button type="submit" class="secondary">Open existing vault</button></form>
+<p id="existingMsg" class="muted" role="status"></p>
 </section></main><script src="/app.js" defer></script></body></html>
