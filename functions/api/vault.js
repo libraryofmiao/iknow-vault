@@ -46,11 +46,15 @@ export async function onRequestPut({request,env}){
  if(!(await rateLimit(request,env,'write',60,900000)))return json({error:'Too many requests. Try again later.'},{status:429});
  let b;try{b=await request.json()}catch{return json({error:'Invalid JSON'},{status:400})}
  if(!valid(b.id,100)||!valid(b.iv,100)||!valid(b.ciphertext)||!valid(b.auth_token,500)||!Number.isInteger(b.version)||b.version<1)return json({error:'Invalid payload'},{status:400});
+ const changingAuth=typeof b.salt==='string'||typeof b.auth_verifier==='string';
+ if(changingAuth&&(!valid(b.salt,100)||!valid(b.auth_verifier,100)))return json({error:'Invalid credential update'},{status:400});
  const row=await env.DB.prepare('SELECT auth_verifier,version FROM vaults WHERE id=?').bind(b.id).first();
  if(!row)return json({error:'Not found'},{status:404});
  if(!(await authorized(new Request(request.url,{headers:{authorization:'Bearer '+b.auth_token}}),row)))return json({error:'Unauthorized'},{status:401});
  const next=row.version+1;
- const r=await env.DB.prepare("UPDATE vaults SET iv=?,ciphertext=?,version=?,updated_at=datetime('now') WHERE id=? AND version=?").bind(b.iv,b.ciphertext,next,b.id,b.version).run();
+ const r=changingAuth
+  ? await env.DB.prepare("UPDATE vaults SET salt=?,auth_verifier=?,iv=?,ciphertext=?,version=?,updated_at=datetime('now') WHERE id=? AND version=?").bind(b.salt,b.auth_verifier,b.iv,b.ciphertext,next,b.id,b.version).run()
+  : await env.DB.prepare("UPDATE vaults SET iv=?,ciphertext=?,version=?,updated_at=datetime('now') WHERE id=? AND version=?").bind(b.iv,b.ciphertext,next,b.id,b.version).run();
  if(!r.meta?.changes)return json({error:'Vault changed elsewhere'},{status:409});
  return json({ok:true,version:next})
 }
