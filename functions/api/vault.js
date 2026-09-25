@@ -28,13 +28,21 @@ export async function onRequestPost({request,env}){
  if(!(await rateLimit(request,env,'create',5,900000)))return json({error:'Too many requests. Try again later.'},{status:429});
  let b;try{b=await request.json()}catch{return json({error:'Invalid JSON'},{status:400})}
  if(!valid(b.salt,100)||!valid(b.iv,100)||!valid(b.ciphertext)||!valid(b.auth_verifier,100))return json({error:'Invalid payload'},{status:400});
+ const existing=await env.DB.prepare('SELECT id FROM vaults LIMIT 1').first();
+ if(existing)return json({error:'A vault already exists. Sign in to the existing vault.'},{status:409});
  const id=crypto.randomUUID();
  await env.DB.prepare("INSERT INTO vaults (id,salt,iv,ciphertext,auth_verifier,version,created_at,updated_at) VALUES (?,?,?,?,?,1,datetime('now'),datetime('now'))").bind(id,b.salt,b.iv,b.ciphertext,b.auth_verifier).run();
  return json({id},{status:201})
 }
 export async function onRequestGet({request,env}){
  if(!(await rateLimit(request,env,'read',120,900000)))return json({error:'Too many requests. Try again later.'},{status:429});
- const id=new URL(request.url).searchParams.get('id');
+ const params=new URL(request.url).searchParams;
+ if(params.get('meta')==='1'){
+  const row=await env.DB.prepare('SELECT id,salt FROM vaults ORDER BY created_at ASC LIMIT 1').first();
+  if(!row)return json({error:'No vault exists'},{status:404});
+  return json({id:row.id,salt:row.salt},{status:200});
+ }
+ const id=params.get('id');
  if(!id||id.length>100)return json({error:'Missing id'},{status:400});
  const row=await env.DB.prepare('SELECT id,salt,iv,ciphertext,auth_verifier,version FROM vaults WHERE id=?').bind(id).first();
  if(!row)return json({error:'Not found'},{status:404});
