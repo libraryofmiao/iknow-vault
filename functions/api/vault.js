@@ -1,4 +1,12 @@
-const json=(x,init={})=>new Response(JSON.stringify(x),{headers:{'Content-Type':'application/json','Cache-Control':'no-store',...(init.headers||{})},...init});
+const SECURITY_HEADERS={
+ 'X-Content-Type-Options':'nosniff',
+ 'X-Frame-Options':'DENY',
+ 'Referrer-Policy':'no-referrer',
+ 'Permissions-Policy':'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+ 'Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+ 'Cache-Control':'no-store'
+};
+const json=(x,init={})=>new Response(JSON.stringify(x),{...init,headers:{'Content-Type':'application/json',...SECURITY_HEADERS,...(init.headers||{})}});
 function valid(s,max=3000000){return typeof s==='string'&&s.length>0&&s.length<=max}
 function fromB64(s){try{const x=atob(s),a=new Uint8Array(x.length);for(let i=0;i<x.length;i++)a[i]=x.charCodeAt(i);return a}catch{return null}}
 function toB64(b){let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s)}
