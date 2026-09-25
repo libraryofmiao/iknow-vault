@@ -62,3 +62,15 @@ async function digestToken(t){
   const bytes=await crypto.subtle.digest('SHA-256',Uint8Array.from(atob(t),c=>c.charCodeAt(0)));
   return b64(new Uint8Array(bytes));
 }
+
+$('#existing').addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=$('#vaultId').value.trim();
+  const m=$('#existingMsg');
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[4-9][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
+    m.textContent='Enter a valid vault ID.';
+    return;
+  }
+  sessionStorage.setItem('iknow_vault_id',id);
+  location.assign('/vault.html');
+});
