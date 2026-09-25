@@ -36,7 +36,6 @@ export async function onRequestGet({request,env}){
  if(params.get('meta')==='1'){const row=await env.DB.prepare('SELECT id,salt FROM vaults ORDER BY created_at ASC LIMIT 1').first();if(!row)return json({error:'No vault exists'},{status:404});return json({id:row.id,salt:row.salt},{status:200})}
  const id=params.get('id');if(!id||id.length>100)return json({error:'Missing id'},{status:400});
  const row=await env.DB.prepare('SELECT id,salt,iv,ciphertext,auth_verifier,version FROM vaults WHERE id=?').bind(id).first();if(!row)return json({error:'Not found'},{status:404});
- if(!(request.headers.get('authorization')||'').startsWith('Bearer '))return json({id:row.id,salt:row.salt},{status:200});
  if(!(await authorized(request,row)))return json({error:'Unauthorized'},{status:401});
  return json({id:row.id,salt:row.salt,iv:row.iv,ciphertext:row.ciphertext,version:row.version})
 }
